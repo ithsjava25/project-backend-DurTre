@@ -6,6 +6,7 @@ import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -21,6 +22,9 @@ public class S3Config {
     @Value("${minio.secret-key}")
     private String secretKey;
 
+    @Value("${minio.bucket}")
+    private String bucket;
+
     @Bean
     public AmazonS3 s3Client() {
         BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
@@ -32,5 +36,17 @@ public class S3Config {
                 .withCredentials(new AWSStaticCredentialsProvider(credentials))
                 .withPathStyleAccessEnabled(true)
                 .build();
+    }
+
+    @Bean
+    public ApplicationRunner createBucket(AmazonS3 s3Client) {
+        return args -> {
+            if (!s3Client.doesBucketExistV2(bucket)) {
+                s3Client.createBucket(bucket);
+                System.out.println("Bucket skapad: " + bucket);
+            } else {
+                System.out.println("Bucket finns redan: " + bucket);
+            }
+        };
     }
 }
