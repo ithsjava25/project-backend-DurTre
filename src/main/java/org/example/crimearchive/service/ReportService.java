@@ -88,13 +88,21 @@ public class ReportService {
             simpleRepository.save(ReportMapper.toEntity(report, s3KeyPdf, s3KeyFile));
 
         } catch (Exception e) {
-            if (s3KeyPdf != null) {
-                s3Client.deleteObject(DeleteObjectRequest.builder()
-                        .bucket(bucket).key(s3KeyPdf).build());
-            }
-            if (s3KeyFile != null) {
-                s3Client.deleteObject(DeleteObjectRequest.builder()
-                        .bucket(bucket).key(s3KeyFile).build());
+            try {
+                if (s3KeyPdf != null) {
+                     s3Client.deleteObject(DeleteObjectRequest.builder()
+                            .bucket(bucket).key(s3KeyPdf).build());
+                    }
+                } catch (Exception cleanupEx) {
+                // Log but don't mask original exception
+                }
+            try {
+                if (s3KeyFile != null) {
+                    s3Client.deleteObject(DeleteObjectRequest.builder()
+                            .bucket(bucket).key(s3KeyFile).build());
+                    }
+                } catch (Exception cleanupEx) {
+                // Log but don't mask original exception
             }
             throw new IOException("Kunde inte spara rapport: " + e.getMessage());
         }
