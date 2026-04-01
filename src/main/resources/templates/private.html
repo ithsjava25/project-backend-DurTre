@@ -5,6 +5,7 @@
     <title>Title</title>
 </head>
 <body>
+<h1>Här kan bara användare med rollen Admin lägga till raporter</h1>
 <form th:action="@{/reports/add}" th:object="${newReport}" method="post">
     <label for="reason">Brottstyp</label>
     <input id="reason" th:field="*{event}"><br/>
@@ -13,5 +14,6 @@
     <button type="submit">Spara</button>
     <button type="reset">Avbryt</button>
 </form>
+<a href="userpage.html">Gå till använar sida</a>
 </body>
 </html>

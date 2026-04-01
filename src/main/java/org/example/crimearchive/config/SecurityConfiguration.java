@@ -1,15 +1,26 @@
 package org.example.crimearchive.config;
 
+import org.example.crimearchive.polis.Account;
+import org.example.crimearchive.polis.AccountUserDetailsService;
+import org.example.crimearchive.polis.UserRepository;
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
-
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) {
@@ -21,11 +32,41 @@ public class SecurityConfiguration {
                     auth.requestMatchers("/index").permitAll();
                     auth.requestMatchers("/error").permitAll();
 
+                    auth.requestMatchers("/private").hasRole("ADMIN");
+                    auth.requestMatchers("/userpage").hasRole("USER");
+
 
                     auth.anyRequest().authenticated();
                 })
                 //Bygger inloggingsformuläret automatiskt
-                .formLogin(formLogin -> formLogin.defaultSuccessUrl("/private"))
-                .build();
+                //.oauth2Login(Customizer.withDefaults())
+                .formLogin(formLogin -> formLogin.defaultSuccessUrl("/userpage"))
+        .build();
     }
+    @Bean
+    public PasswordEncoder passwordEncoder(){
+        BCryptPasswordEncoder encodeWrapper = new BCryptPasswordEncoder();
+
+        return new PasswordEncoder(){
+            @Override
+            public String encode(CharSequence rawPassword){
+                return encodeWrapper.encode(rawPassword);
+            }
+
+            @Override
+            public boolean matches(@Nullable CharSequence rawPassword, @Nullable String encodedPassword) {
+                System.out.println("Mathing pågår!");
+                System.out.println("Gammla lösenord: " + encodeWrapper.encode(rawPassword) + " Databasens lössenord: " + encodedPassword);
+                boolean isValid = encodeWrapper.matches(rawPassword, encodedPassword);
+                System.out.println("Matchade lösenord: " + isValid);
+                return encodeWrapper.matches(rawPassword, encodedPassword);
+            }
+        };
+    }
+
+    @Bean
+    AccountUserDetailsService userDetailsService(UserRepository repo){
+        return new AccountUserDetailsService(repo);
+    }
+
 }

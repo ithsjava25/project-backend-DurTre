@@ -2,7 +2,9 @@ package org.example.crimearchive.controllers;
 
 import jakarta.validation.Valid;
 import org.example.crimearchive.DTO.CreateReport;
+import org.example.crimearchive.polis.Account;
 import org.example.crimearchive.service.ReportService;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,9 +27,14 @@ public class HomeController {
     }
 
     @GetMapping("/private")
-    public String privatePage(Model model) {
+    public String privatePage(@AuthenticationPrincipal Account user, Model model) {
         model.addAttribute("newReport", new CreateReport());
         return "private";
+    }
+
+    @GetMapping("/userpage")
+    public String userPage(Model model){
+        return "userpage";
     }
 
     @PostMapping("/reports/add")
