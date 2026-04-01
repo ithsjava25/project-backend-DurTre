@@ -34,12 +34,19 @@ public class HomeController {
         return "private";
     }
 
-    @PostMapping("/reports/add")
+   @PostMapping("/reports/add")
     public String saveReport(
-            @ModelAttribute("newReport") @Valid CreateReport newReport,
-            @RequestParam(value = "file", required = false) MultipartFile file) throws IOException {
-        reportService.saveReport(newReport, file);
-        return "redirect:/";
+        @ModelAttribute("newReport") @Valid CreateReport newReport,
+        @RequestParam(value = "file", required = false) MultipartFile file,
+    Model model) {
+        try {
+            reportService.saveReport(newReport, file);
+            return "redirect:/";
+        } catch (IOException e) {
+            model.addAttribute("error", "Kunde inte spara rapporten. Försök igen.");
+            model.addAttribute("newReport", newReport);
+            return "private";
+        }
     }
 
     @GetMapping("/reports")
