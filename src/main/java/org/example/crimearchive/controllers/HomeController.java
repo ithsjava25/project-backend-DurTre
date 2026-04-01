@@ -2,7 +2,7 @@ package org.example.crimearchive.controllers;
 
 import jakarta.validation.Valid;
 import org.example.crimearchive.DTO.CreateReport;
-import org.example.crimearchive.bevis.Report;
+import org.example.crimearchive.DTO.ReportResponse;
 import org.example.crimearchive.service.ReportService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -41,17 +41,19 @@ public class HomeController {
         reportService.saveReport(newReport, file);
         return "redirect:/";
     }
+
     @GetMapping("/reports")
-    public ResponseEntity<List<Report>> getAllReports() {
-        return ResponseEntity.ok(reportService.getAllReports());
+    public ResponseEntity<List<ReportResponse>> getAllReports() {
+        return ResponseEntity.ok(reportService.getAllReportResponses());
     }
+
     @GetMapping("/reports/{uuid}/download/pdf")
-    public ResponseEntity<byte[]> downloadPdf(@PathVariable UUID uuid) throws IOException {
+    public ResponseEntity<byte[]> downloadPdf(@PathVariable UUID uuid) {
         return reportService.downloadPdf(uuid);
     }
 
     @GetMapping("/reports/{uuid}/download/file")
-    public ResponseEntity<byte[]> downloadFile(@PathVariable UUID uuid) throws IOException {
+    public ResponseEntity<byte[]> downloadFile(@PathVariable UUID uuid) {
         return reportService.downloadFile(uuid);
     }
 }

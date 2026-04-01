@@ -56,7 +56,7 @@ public class S3Config {
                             .build());
                     System.out.println("Bucket skapad: " + bucket);
                 } else {
-                    System.err.println("Fel vid kontroll av bucket: " + e.getMessage());
+                    throw new RuntimeException("Fel vid kontroll av bucket: " + e.getMessage(), e);
                 }
             }
         };
