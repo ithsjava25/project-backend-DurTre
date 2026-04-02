@@ -1,12 +1,11 @@
-package org.example.crimearchive.försvare;
+package org.example.crimearchive.Entity.Golare;
 
 
 import jakarta.persistence.*;
 
-
 @Entity
-@Table(name = "advokat")
-public class Advocat {
+@Table(name = "golare")
+public class Golare {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,11 +15,9 @@ public class Advocat {
     private String namn;
 
     @Column(nullable = false)
-    public String telefon;
+    private String Telephone;
 
     @Column(nullable = false)
-    public String email;
+    private String email;
 
-    @Column(nullable = false, name = "Company")
-    public String Company;
 }
