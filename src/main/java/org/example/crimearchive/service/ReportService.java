@@ -1,5 +1,6 @@
 package org.example.crimearchive.service;
 
+import com.itextpdf.text.Image;
 import org.example.crimearchive.DTO.ReportResponse;
 import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -54,10 +55,38 @@ public class ReportService {
             Document document = new Document();
             PdfWriter.getInstance(document, pdfStream);
             document.open();
+
+
             document.add(new Paragraph("Brottsanmälan"));
             document.add(new Paragraph("Namn: " + report.name()));
             document.add(new Paragraph("Brottstyp: " + report.event()));
             document.add(new Paragraph("Datum: " + LocalDateTime.now()));
+
+
+            if (file != null && !file.isEmpty()) {
+                document.newPage();
+
+                if (isImage(file)) {
+                    document.add(new Paragraph("Bifogat bevisfoto:"));
+                    Image image = Image.getInstance(file.getBytes());
+                    image.scaleToFit(500, 700);
+                    document.add(image);
+
+                } else if (isPdf(file)) {
+                    document.add(new Paragraph("Bifogat dokument (PDF):"));
+                    document.add(new Paragraph(file.getOriginalFilename()));
+                    document.add(new Paragraph("Se separat bifogad fil för fullständigt dokument."));
+
+                } else if (isWord(file)) {
+                    document.add(new Paragraph("Bifogat dokument (Word):"));
+                    document.add(new Paragraph(file.getOriginalFilename()));
+                    document.add(new Paragraph("Se separat bifogad fil för fullständigt dokument."));
+
+                } else {
+                    document.add(new Paragraph("Bifogad fil: " + file.getOriginalFilename()));
+                }
+            }
+
             document.close();
 
             byte[] pdfBytes = pdfStream.toByteArray();
@@ -90,22 +119,36 @@ public class ReportService {
         } catch (Exception e) {
             try {
                 if (s3KeyPdf != null) {
-                     s3Client.deleteObject(DeleteObjectRequest.builder()
+                    s3Client.deleteObject(DeleteObjectRequest.builder()
                             .bucket(bucket).key(s3KeyPdf).build());
-                    }
-                } catch (Exception cleanupEx) {
-                // Log but don't mask original exception
                 }
+            } catch (Exception cleanupEx) {}
             try {
                 if (s3KeyFile != null) {
                     s3Client.deleteObject(DeleteObjectRequest.builder()
                             .bucket(bucket).key(s3KeyFile).build());
-                    }
-                } catch (Exception cleanupEx) {
-                // Log but don't mask original exception
-            }
+                }
+            } catch (Exception cleanupEx) {}
             throw new IOException("Kunde inte spara rapport: " + e.getMessage());
         }
+    }
+
+    private boolean isImage(MultipartFile file) {
+        String contentType = file.getContentType();
+        return contentType != null && contentType.startsWith("image/");
+    }
+
+    private boolean isPdf(MultipartFile file) {
+        String contentType = file.getContentType();
+        return contentType != null && contentType.equals("application/pdf");
+    }
+
+    private boolean isWord(MultipartFile file) {
+        String contentType = file.getContentType();
+        return contentType != null && (
+                contentType.equals("application/msword") ||
+                        contentType.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+        );
     }
 
     public ResponseEntity<byte[]> downloadPdf(UUID uuid) {
