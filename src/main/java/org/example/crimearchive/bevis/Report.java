@@ -13,15 +13,25 @@ public class Report {
     private UUID uuid;
     private String name;
     private String event;
+    private String caseNumber;
 
 
     public Report() {
     }
 
-    public Report(UUID id, String name, String event) {
+    public Report(UUID id, String name, String event, String caseNumber) {
         this.uuid = id;
         this.name = name;
         this.event = event;
+        this.caseNumber = caseNumber;
+    }
+
+    public String getCaseNumber() {
+        return caseNumber;
+    }
+
+    public void setCaseNumber(String caseNumber) {
+        this.caseNumber = caseNumber;
     }
 
     public UUID getUuid() {

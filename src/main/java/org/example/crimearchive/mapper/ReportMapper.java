@@ -11,7 +11,8 @@ public class ReportMapper {
         return new Report(
                 UUID.randomUUID(),
                 report.name(),
-                report.event()
+                report.event(),
+                report.caseNumber()
         );
     }
 

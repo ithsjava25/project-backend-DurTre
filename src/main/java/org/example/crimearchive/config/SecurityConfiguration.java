@@ -39,29 +39,13 @@ public class SecurityConfiguration {
                     auth.anyRequest().authenticated();
                 })
                 //Bygger inloggingsformuläret automatiskt
-                //.oauth2Login(Customizer.withDefaults())
+                .oauth2Login(Customizer.withDefaults())
                 .formLogin(formLogin -> formLogin.defaultSuccessUrl("/userpage"))
         .build();
     }
     @Bean
     public PasswordEncoder passwordEncoder(){
-        BCryptPasswordEncoder encodeWrapper = new BCryptPasswordEncoder();
-
-        return new PasswordEncoder(){
-            @Override
-            public String encode(CharSequence rawPassword){
-                return encodeWrapper.encode(rawPassword);
-            }
-
-            @Override
-            public boolean matches(@Nullable CharSequence rawPassword, @Nullable String encodedPassword) {
-                System.out.println("Mathing pågår!");
-                System.out.println("Gammla lösenord: " + encodeWrapper.encode(rawPassword) + " Databasens lössenord: " + encodedPassword);
-                boolean isValid = encodeWrapper.matches(rawPassword, encodedPassword);
-                System.out.println("Matchade lösenord: " + isValid);
-                return encodeWrapper.matches(rawPassword, encodedPassword);
-            }
-        };
+        return new BCryptPasswordEncoder();
     }
 
     @Bean

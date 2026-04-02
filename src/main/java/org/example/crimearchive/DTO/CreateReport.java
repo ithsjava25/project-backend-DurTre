@@ -6,9 +6,11 @@ public record CreateReport(
         @NotBlank(message = "Måste ha en anledning till anmälan")
         String event,
         @NotBlank(message = "Måste ha ett namn på anmälaren")
-        String name) {
+        String name,
+
+        String caseNumber){
 
     public CreateReport() {
-        this("", "");
+        this("", "","");
     }
 }
