@@ -1,5 +1,6 @@
 package org.example.crimearchive;
 
+import org.example.crimearchive.repository.SimpleRepository;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -9,9 +10,11 @@ import java.time.Year;
 public class KNumberService {
 
     private final JdbcTemplate jdbcTemplate;
+    private final SimpleRepository repository;
 
-    public KNumberService(JdbcTemplate jdbcTemplate) {
+    public KNumberService(JdbcTemplate jdbcTemplate, SimpleRepository repository) {
         this.jdbcTemplate = jdbcTemplate;
+        this.repository = repository;
     }
 
     public String getKNumber() {
@@ -21,5 +24,19 @@ public class KNumberService {
         int year = Year.now().getValue();
 
         return String.format("K-%d-%06d", year, sequenceValue);
+    }
+
+    public String getCaseNumber() {
+        int year = Year.now().getValue();
+        String knumber = repository.findLastKnumber(String.valueOf(year));
+        System.out.println("KNummer frpån db: " + knumber);
+        if (knumber == null) {
+            int firstNumber = 1;
+            return String.format("K-%d-%06d", year, firstNumber);
+        } else {
+            int intNumber = Integer.parseInt(knumber.substring(7));
+            System.out.println("int nummer: " + intNumber);
+            return String.format("K-%d-%06d", year, (intNumber + 1));
+        }
     }
 }
