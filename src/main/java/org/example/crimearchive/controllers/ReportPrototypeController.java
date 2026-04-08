@@ -13,7 +13,17 @@ public class ReportPrototypeController {
 
     @GetMapping("/reports/prototype")
     public String showPrototypeReport(Model model) {
+        model.addAttribute("report", createMockReport());
+        return "report-prototype";
+    }
 
+    @GetMapping("/reports/prototype/bildbilaga")
+    public String showPrototypeAttachment(Model model) {
+        model.addAttribute("report", createMockReport());
+        return "report-attachment-prototype";
+    }
+
+    private Report createMockReport() {
         Report report = new Report();
         report.setUuid(UUID.randomUUID());
 
@@ -26,18 +36,18 @@ public class ReportPrototypeController {
         report.setEvent("Kränkande uttalande på allmän plats");
         report.setLocation("ICA Focus, Gårda");
         report.setDescription("""
-        Målsäganden, som är anställd på ICA Focus i Gårda, uppger att hon i samband
-        med händelsen blivit utsatt för ett kränkande uttalande av innebörd att hon
-        skulle ha "bättre mustasch än Håkan Juholt".
+                Målsäganden, som är anställd på ICA Focus i Gårda, uppger att hon i samband
+                med händelsen blivit utsatt för ett kränkande uttalande av innebörd att hon
+                skulle ha "bättre mustasch än Håkan Juholt".
 
-        Enligt uppgift har uttalandet medfört betydande psykiskt lidande för
-        målsäganden och uppges ha lett till utdraget självskadebeteende samt
-        behandlings- och terapikostnader om cirka 16 000 kronor.
+                Enligt uppgift har uttalandet medfört betydande psykiskt lidande för
+                målsäganden och uppges ha lett till utdraget självskadebeteende samt
+                behandlings- och terapikostnader om cirka 16 000 kronor.
 
-        Den utpekade personen förnekar enligt uppgift inte att uttalandet fällts,
-        men uppges ha anfört att målsäganden är en "snöflinga" och att hon kan
-        "spola ner sina tårar i toaletten".
-        """);
+                Den utpekade personen förnekar enligt uppgift inte att uttalandet fällts,
+                men uppges ha anfört att målsäganden är en "snöflinga" och att hon kan
+                "spola ner sina tårar i toaletten".
+                """);
 
         report.setCreatedAt(LocalDateTime.now());
 
@@ -50,7 +60,6 @@ public class ReportPrototypeController {
         report.setUnit("9B3");
         report.setAuthorityCode("0942");
 
-        model.addAttribute("report", report);
-        return "report-prototype";
+        return report;
     }
 }

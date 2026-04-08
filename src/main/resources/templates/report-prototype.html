@@ -4,12 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prototyp – Anmälan</title>
+    <link rel="stylesheet" th:href="@{/css/report-common.css}">
     <link rel="stylesheet" th:href="@{/css/report-prototype.css}">
 </head>
 <body>
 
 <div class="page-wrapper">
     <div class="page">
+
+        <div class="secret-marker">
+            <img th:src="@{/images/hemlig.png}" alt="Hemlig markering" class="secret-stamp">
+        </div>
 
         <header class="document-header">
             <div class="header-left">
@@ -25,7 +30,7 @@
             </div>
 
             <div class="header-right">
-                <div><strong>Dnr:</strong> <span th:text="${report.caseNumber}"></span></div>
+                <div><strong>K-nr:</strong> <span th:text="${report.caseNumber}"></span></div>
                 <div><strong>Sida:</strong> 1</div>
                 <div><strong>Skapad:</strong> <span th:text="${#temporals.format(report.createdAt, 'yyyy-MM-dd HH:mm')}"></span></div>
             </div>
@@ -44,7 +49,7 @@
                 </div>
 
                 <div>
-                    <div><strong>Dnr:</strong> <span th:text="${report.caseNumber}"></span></div>
+                    <div><strong>K-nr:</strong> <span th:text="${report.caseNumber}"></span></div>
                     <div><strong>Anmälningsdatum:</strong> <span th:text="${#temporals.format(report.createdAt, 'yyyy-MM-dd HH:mm')}"></span></div>
                     <div><strong>Anmälningssätt:</strong> Polisman i tjänst</div>
                     <div><strong>Handl. p-mynd:</strong> <span th:text="${report.policeAuthority}"></span></div>
@@ -127,6 +132,12 @@
         </section>
 
         <div class="divider"></div>
+
+        <div class="attachment-link-wrapper">
+            <a class="attachment-link" th:href="@{/reports/prototype/bildbilaga}">
+                Visa bildbilaga
+            </a>
+        </div>
 
         <footer class="document-footer">
             <div>
