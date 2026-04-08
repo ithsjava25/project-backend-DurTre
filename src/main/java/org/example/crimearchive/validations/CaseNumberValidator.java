@@ -7,15 +7,9 @@ public class CaseNumberValidator implements ConstraintValidator<ValidCasenumber,
 
     @Override
     public boolean isValid(String s, ConstraintValidatorContext constraintValidatorContext) {
-        if (s.isBlank()) {
-            System.out.println("String is blank returns true");
+        if (s.isBlank() || s.matches("^\\d{4}-\\d{6}$") || s.matches("^[Kk]-\\d{4}-\\d{6}$")) {
             return true;
         }
-        if (s.matches("K-\\d{4}-\\d{6}$")) {
-            System.out.println("String is correct, returns true");
-            return true;
-        }
-        System.out.println("String is incorrect, returns false. String: " + s);
         return false;
     }
 }

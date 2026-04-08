@@ -30,8 +30,7 @@ public class KNumberService {
         int year = Year.now().getValue();
         String knumber = repository.findLastKnumber(String.valueOf(year));
         if (knumber == null) {
-            int firstNumber = 1;
-            return String.format("K-%d-%06d", year, firstNumber);
+            return String.format("K-%d-%06d", year, 1);
         } else {
             int intNumber = Integer.parseInt(knumber.substring(7));
             return String.format("K-%d-%06d", year, (intNumber + 1));

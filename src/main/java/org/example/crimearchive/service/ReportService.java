@@ -23,11 +23,25 @@ public class ReportService {
 
     public void saveReport(CreateReport report) {
         if (report.caseNumber() == null || report.caseNumber().isBlank()) {
-            String lastCaseNumber = knumberSErvice.getCaseNumber();
-            simpleRepository.save(ReportMapper.toEntity(new CreateReport(report.event(), report.name(), lastCaseNumber)));
+            simpleRepository.save(ReportMapper.toEntity(new CreateReport(report.event(), report.name(), knumberSErvice.getCaseNumber())));
         } else {
-            simpleRepository.save(ReportMapper.toEntity(report));
+            String santiziedNumber = caseNumberSanitation(report.caseNumber());
+            if (caseNumberExists(santiziedNumber))
+                simpleRepository.save(ReportMapper.toEntity(report));
+            simpleRepository.save(ReportMapper.toEntity(new CreateReport(report.event(), report.name(), knumberSErvice.getCaseNumber())));
         }
+    }
+
+    private String caseNumberSanitation(String caseNumber) {
+        if (caseNumber.matches("^\\d{4}-\\d{6}$")) {
+            return "K-" + caseNumber;
+        } else {
+            return caseNumber.toUpperCase();
+        }
+    }
+
+    public boolean caseNumberExists(String caseNumber) {
+        return simpleRepository.existsByCaseNumber(caseNumber);
     }
 
     public List<Report> getAllReports() {

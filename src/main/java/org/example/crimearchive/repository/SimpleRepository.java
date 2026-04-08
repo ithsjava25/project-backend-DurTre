@@ -12,4 +12,6 @@ public interface SimpleRepository extends ListCrudRepository<Report, UUID> {
     @Query(value = "select case_number from report where case_number like CONCAT('%', :year, '%') order by case_number desc limit 1",
             nativeQuery = true)
     String findLastKnumber(@Param("year") String year);
+
+    boolean existsByCaseNumber(String caseNumber);
 }
