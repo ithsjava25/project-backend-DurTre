@@ -33,10 +33,13 @@ public class CrimeCase {
     @JoinColumn(name = "aklagare_id")
     private Åklagare aklagare;
 
-    // Kommenterat ut tillfälligt då Brottsplats saknar @Entity
-    // @ManyToOne
-    // @JoinColumn(name = "brottsplats_id")
-    // private Brottsplats brottsplats;
+    @ManyToOne
+    @JoinColumn(name = "brottsplats_id")
+    private Brottsplats brottsplats;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "case_id")
+    private Set<Bevis> bevis = new HashSet<>();
 
     @ManyToMany
     @JoinTable(
@@ -45,11 +48,6 @@ public class CrimeCase {
         inverseJoinColumns = @JoinColumn(name = "police_id")
     )
     private Set<Aina> poliser = new HashSet<>();
-
-    // Kommenterat ut tillfälligt då Bevis saknar @Entity
-    // @OneToMany
-    // @JoinColumn(name = "case_id")
-    // private Set<Bevis> bevis = new HashSet<>();
 
     @ManyToMany
     @JoinTable(
@@ -82,12 +80,12 @@ public class CrimeCase {
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public Åklagare getAklagare() { return aklagare; }
     public void setAklagare(Åklagare aklagare) { this.aklagare = aklagare; }
-    // public Brottsplats getBrottsplats() { return brottsplats; }
-    // public void setBrottsplats(Brottsplats brottsplats) { this.brottsplats = brottsplats; }
+    public Brottsplats getBrottsplats() { return brottsplats; }
+    public void setBrottsplats(Brottsplats brottsplats) { this.brottsplats = brottsplats; }
     public Set<Aina> getPoliser() { return poliser; }
     public void setPoliser(Set<Aina> poliser) { this.poliser = poliser; }
-    // public Set<Bevis> getBevis() { return bevis; }
-    // public void setBevis(Set<Bevis> bevis) { this.bevis = bevis; }
+    public Set<Bevis> getBevis() { return bevis; }
+    public void setBevis(Set<Bevis> bevis) { this.bevis = bevis; }
     public Set<Brottsoffer> getBrottsoffer() { return brottsoffer; }
     public void setBrottsoffer(Set<Brottsoffer> brottsoffer) { this.brottsoffer = brottsoffer; }
     public Set<Vittne> getVittnen() { return vittnen; }
