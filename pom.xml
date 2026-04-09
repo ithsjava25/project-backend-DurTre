@@ -121,6 +121,10 @@
             <version>5.5.13.5</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security-oauth2-client</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

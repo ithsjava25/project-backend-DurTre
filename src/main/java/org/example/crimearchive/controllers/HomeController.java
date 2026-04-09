@@ -2,25 +2,33 @@ package org.example.crimearchive.controllers;
 
 import jakarta.validation.Valid;
 import org.example.crimearchive.DTO.CreateReport;
-import org.example.crimearchive.DTO.ReportResponse;
-import org.example.crimearchive.service.ReportService;
+import org.example.crimearchive.cases.CaseService;
+import org.example.crimearchive.cases.CasesRepository;
+import org.example.crimearchive.polis.Account;
+import org.example.crimearchive.reports.ReportService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.util.List;
 import java.util.UUID;
 
 @Controller
 public class HomeController {
 
+    Logger log = LoggerFactory.getLogger(HomeController.class);
     private final ReportService reportService;
+    private final CaseService caseService;
+    private final CasesRepository casesRepository;
 
-    public HomeController(ReportService reportService) {
+    public HomeController(ReportService reportService, CaseService caseService, CasesRepository casesRepository) {
         this.reportService = reportService;
+        this.caseService = caseService;
+        this.casesRepository = casesRepository;
     }
 
     @GetMapping("/")
@@ -29,29 +37,45 @@ public class HomeController {
     }
 
     @GetMapping("/private")
-    public String privatePage(Model model) {
+    public String privatePage(@AuthenticationPrincipal Account user, Model model) {
         model.addAttribute("newReport", new CreateReport());
         return "private";
     }
 
-   @PostMapping("/reports/add")
-    public String saveReport(
-        @ModelAttribute("newReport") @Valid CreateReport newReport,
-        @RequestParam(value = "file", required = false) MultipartFile file,
-    Model model) {
-        try {
-            reportService.saveReport(newReport, file);
-            return "redirect:/";
-        } catch (IOException e) {
-            model.addAttribute("error", "Kunde inte spara rapporten. Försök igen.");
-            model.addAttribute("newReport", newReport);
-            return "private";
-        }
+    @GetMapping("/userpage")
+    public String userPage(@AuthenticationPrincipal Account user, Model model) {
+        model.addAttribute("reportAmount", reportService.getAmount());
+        return "userpage";
     }
 
-    @GetMapping("/reports")
-    public ResponseEntity<List<ReportResponse>> getAllReports() {
-        return ResponseEntity.ok(reportService.getAllReportResponses());
+    @GetMapping("/cases")
+    public String casesPage(@RequestParam(required = false) Long accountId, Model model) {
+        if (accountId != null) {
+            model.addAttribute("cases", casesRepository.findByAccountsId(accountId));
+            model.addAttribute("accountId", accountId);
+        }
+        return "cases";
+    }
+
+    @PostMapping("/cases/add")
+    public String casesPage(@RequestParam Long addAccountId,
+                            @RequestParam String case_number){
+        caseService.addAccountToCase(addAccountId, case_number);
+        return "redirect:/cases";
+    }
+
+    @PostMapping("/reports/add")
+    public String saveReport(
+            @ModelAttribute("newReport") @Valid CreateReport newReport,
+            BindingResult bindingResult,
+            @AuthenticationPrincipal Account currentUser) {
+
+        if (bindingResult.hasErrors()) {
+            log.info("Binding Error: {}", bindingResult.getAllErrors().getLast());
+            return "private";
+        }
+        reportService.saveReport(newReport, currentUser);
+        return "redirect:/userpage";
     }
 
     @GetMapping("/reports/{uuid}/download/pdf")

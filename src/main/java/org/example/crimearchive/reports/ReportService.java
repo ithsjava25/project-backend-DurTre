@@ -1,21 +1,16 @@
-package org.example.crimearchive.service;
+package org.example.crimearchive.reports;
 
-import com.itextpdf.text.Image;
-import org.example.crimearchive.DTO.ReportResponse;
-import software.amazon.awssdk.core.ResponseBytes;
-import software.amazon.awssdk.core.sync.RequestBody;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectResponse;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import com.itextpdf.text.Document;
+import com.itextpdf.text.Image;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.PdfWriter;
 import org.example.crimearchive.DTO.CreateReport;
-import org.example.crimearchive.bevis.Report;
+import org.example.crimearchive.DTO.ReportResponse;
+import org.example.crimearchive.KNumberService;
+import org.example.crimearchive.cases.Cases;
+import org.example.crimearchive.cases.CasesRepository;
 import org.example.crimearchive.mapper.ReportMapper;
-import org.example.crimearchive.repository.SimpleRepository;
+import org.example.crimearchive.polis.Account;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -24,6 +19,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import software.amazon.awssdk.core.ResponseBytes;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -34,19 +36,44 @@ import java.util.UUID;
 @Service
 public class ReportService {
 
-    private final SimpleRepository simpleRepository;
+    private final ReportRepository reportRepository;
+    private final KNumberService knumberService;
+    private final CasesRepository casesRepository;
     private final S3Client s3Client;
 
     @Value("${minio.bucket}")
     private String bucket;
 
-    public ReportService(SimpleRepository simpleRepository, S3Client s3Client) {
-        this.simpleRepository = simpleRepository;
+    public ReportService(ReportRepository reportRepository, KNumberService knumberService, CasesRepository casesRepository, S3Client s3Client) {
+        this.reportRepository = reportRepository;
+        this.knumberService = knumberService;
+        this.casesRepository = casesRepository;
         this.s3Client = s3Client;
     }
 
     @Transactional
-    public void saveReport(CreateReport report, MultipartFile file) throws IOException {
+    public void saveReport(CreateReport report, Account currentUser) {
+        Cases cases;
+
+        if (report.caseNumber() == null || report.caseNumber().isBlank()) {
+            String newCaseNumber = knumberService.getKNumber();
+            cases = new Cases(newCaseNumber);
+
+            cases.getAccounts().add(currentUser);
+
+            casesRepository.save(cases);
+        } else {
+            String sanitized = caseNumberSanitation(report.caseNumber());
+            cases = casesRepository.findFirstByCaseNumber(sanitized)
+                    .orElseThrow(() -> new RuntimeException("Case not found: " + sanitized));
+        }
+
+        Report newReport = new Report(UUID.randomUUID(), report.name(), report.event(), cases);
+        reportRepository.save(newReport);
+    }
+
+    @Transactional
+    public void saveReportWithFile(CreateReport report, MultipartFile file) throws IOException {
         String s3KeyPdf = null;
         String s3KeyFile = null;
 
@@ -114,7 +141,7 @@ public class ReportService {
                 );
             }
 
-            simpleRepository.save(ReportMapper.toEntity(report, s3KeyPdf, s3KeyFile));
+            reportRepository.save(ReportMapper.toEntity(report, s3KeyPdf, s3KeyFile));
 
         } catch (Exception e) {
             try {
@@ -122,13 +149,15 @@ public class ReportService {
                     s3Client.deleteObject(DeleteObjectRequest.builder()
                             .bucket(bucket).key(s3KeyPdf).build());
                 }
-            } catch (Exception cleanupEx) {}
+            } catch (Exception cleanupEx) {
+            }
             try {
                 if (s3KeyFile != null) {
                     s3Client.deleteObject(DeleteObjectRequest.builder()
                             .bucket(bucket).key(s3KeyFile).build());
                 }
-            } catch (Exception cleanupEx) {}
+            } catch (Exception cleanupEx) {
+            }
             throw new IOException("Kunde inte spara rapport: " + e.getMessage());
         }
     }
@@ -151,8 +180,25 @@ public class ReportService {
         );
     }
 
+
+    private String caseNumberSanitation(String caseNumber) {
+        if (caseNumber.matches("^\\d{4}-\\d{6}$")) {
+            return "K-" + caseNumber;
+        } else {
+            return caseNumber.toUpperCase();
+        }
+    }
+
+    public List<Report> getAllReports() {
+        return reportRepository.findAll();
+    }
+
+    public long getAmount() {
+        return reportRepository.count();
+    }
+
     public ResponseEntity<byte[]> downloadPdf(UUID uuid) {
-        Report report = simpleRepository.findById(uuid)
+        Report report = reportRepository.findById(uuid)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Rapporten hittades inte: " + uuid));
 
@@ -174,7 +220,7 @@ public class ReportService {
     }
 
     public ResponseEntity<byte[]> downloadFile(UUID uuid) {
-        Report report = simpleRepository.findById(uuid)
+        Report report = reportRepository.findById(uuid)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Rapporten hittades inte: " + uuid));
 
@@ -193,13 +239,10 @@ public class ReportService {
                 .header("Content-Disposition", "attachment; filename=fil")
                 .body(objectBytes.asByteArray());
     }
+
     public List<ReportResponse> getAllReportResponses() {
-        return simpleRepository.findAll().stream()
+        return reportRepository.findAll().stream()
                 .map(r -> new ReportResponse(r.getUuid(), r.getName(), r.getEvent()))
                 .toList();
-    }
-
-    public List<Report> getAllReports() {
-        return simpleRepository.findAll();
     }
 }

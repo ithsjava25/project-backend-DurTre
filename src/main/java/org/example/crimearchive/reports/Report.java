@@ -1,7 +1,10 @@
-package org.example.crimearchive.bevis;
+package org.example.crimearchive.reports;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import org.example.crimearchive.cases.Cases;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -15,18 +18,43 @@ public class Report {
     private String event;
     private String s3KeyPdf;
     private String s3KeyFile;
+    @ManyToOne
+    @JoinColumn(name = "reports")
+    private Cases caseEntity;
 
+    public Cases getCaseEntity() {
+        return caseEntity;
+    }
+
+    public void setCaseEntity(Cases caseEntity) {
+        this.caseEntity = caseEntity;
+    }
 
     public Report() {
     }
 
-    public Report(UUID id, String name, String event, String s3KeyPdf, String s3KeyFile) {
+    public Report(UUID id, String name, String event, String s3KeyPdf, String s3KeyFile, Cases caseEntity) {
         this.uuid = id;
         this.name = name;
         this.event = event;
         this.s3KeyPdf = s3KeyPdf;
         this.s3KeyFile = s3KeyFile;
+        this.caseEntity = caseEntity;
     }
+
+    public Report(UUID id, String name, String event, String s3Keypdf, String s3KeyFile) {
+        this(id, name, event, s3Keypdf, s3KeyFile, null);
+    }
+
+    public Report(UUID id, String name, String event, Cases caseEntity) {
+        this(id, name, event, null, null, caseEntity);
+    }
+
+    public Report(UUID id, String name, String event) {
+        this(id, name, event, null, null, null);
+    }
+
+
 
     public UUID getUuid() {
         return uuid;
