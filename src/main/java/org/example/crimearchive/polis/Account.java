@@ -1,15 +1,15 @@
 package org.example.crimearchive.polis;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import org.example.crimearchive.bevis.Cases;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 public class Account implements UserDetails {
@@ -19,13 +19,8 @@ public class Account implements UserDetails {
     private String username;
     private String password;
     private Collection<? extends GrantedAuthority> authorities;
-//    @ManyToMany()
-//    @JoinTable(
-//            name = "account_cases",
-//            joinColumns = @JoinColumn(name = "account_id"),
-//            inverseJoinColumns = @JoinColumn(name = "case_number")
-//    )
-//    private Set<Investigation> permittedCases;
+    @ManyToMany(mappedBy = "accounts")
+    private Set<Cases> permittedCases = new HashSet<>();
 
 
     public Long getId() {

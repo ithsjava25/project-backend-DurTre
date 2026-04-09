@@ -2,9 +2,7 @@ package org.example.crimearchive.service;
 
 import org.example.crimearchive.DTO.CreateReport;
 import org.example.crimearchive.KNumberService;
-import org.example.crimearchive.bevis.Investigation;
 import org.example.crimearchive.bevis.Report;
-import org.example.crimearchive.mapper.ReportMapper;
 import org.example.crimearchive.permissions.PermissionRepository;
 import org.example.crimearchive.repository.SimpleRepository;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,14 +26,15 @@ public class ReportService {
 
     public void saveReport(CreateReport report) {
         if (report.caseNumber() == null || report.caseNumber().isBlank()) {
-            String latestCaseNumber = knumberSErvice.getCaseNumber();
-            permissionRepository.save(new Investigation(latestCaseNumber));
-            simpleRepository.save(ReportMapper.toEntity(new CreateReport(report.event(), report.name(), latestCaseNumber)));
+//            String latestCaseNumber = knumberSErvice.getCaseNumber();
+//            permissionRepository.save(new Cases(latestCaseNumber));
+
+            //simpleRepository.save(ReportMapper.toEntity(new CreateReport(report.event(), report.name(), latestCaseNumber)));
         } else {
             String santiziedNumber = caseNumberSanitation(report.caseNumber());
-            if (caseNumberExists(santiziedNumber))
-                simpleRepository.save(ReportMapper.toEntity(report));
-            simpleRepository.save(ReportMapper.toEntity(new CreateReport(report.event(), report.name(), knumberSErvice.getCaseNumber())));
+            //if (caseNumberExists(santiziedNumber))
+            //    simpleRepository.save(ReportMapper.toEntity(report));
+            //simpleRepository.save(ReportMapper.toEntity(new CreateReport(report.event(), report.name(), knumberSErvice.getCaseNumber())));
         }
     }
 

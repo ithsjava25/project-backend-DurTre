@@ -2,6 +2,8 @@ package org.example.crimearchive.bevis;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -13,17 +15,21 @@ public class Report {
     private UUID uuid;
     private String name;
     private String event;
-    private String caseNumber;
+    //private String caseNumber;
+    @ManyToOne
+    @JoinColumn(name = "reports")
+    private Cases caseEntity;
+
 
 
     public Report() {
     }
 
-    public Report(UUID id, String name, String event, String caseNumber) {
+    public Report(UUID id, String name, String event, Cases caseEntity) {
         this.uuid = id;
         this.name = name;
         this.event = event;
-        this.caseNumber = caseNumber;
+        this.caseEntity = caseEntity;
     }
 
 //    public Set<Account> getPermittedViewers() {
@@ -34,13 +40,6 @@ public class Report {
 //        this.permittedViewers = permittedViewers;
 //    }
 
-    public String getCaseNumber() {
-        return caseNumber;
-    }
-
-    public void setCaseNumber(String caseNumber) {
-        this.caseNumber = caseNumber;
-    }
 
     public UUID getUuid() {
         return uuid;
