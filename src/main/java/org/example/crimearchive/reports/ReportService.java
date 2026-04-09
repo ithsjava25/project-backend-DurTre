@@ -44,9 +44,9 @@ public class ReportService {
     @Value("${minio.bucket}")
     private String bucket;
 
-    public ReportService(ReportRepository reportRepository, KNumberService kservice, CasesRepository casesRepository, S3Client s3Client) {
+    public ReportService(ReportRepository reportRepository, KNumberService knumberService, CasesRepository casesRepository, S3Client s3Client) {
         this.reportRepository = reportRepository;
-        this.knumberService = kservice;
+        this.knumberService = knumberService;
         this.casesRepository = casesRepository;
         this.s3Client = s3Client;
     }
