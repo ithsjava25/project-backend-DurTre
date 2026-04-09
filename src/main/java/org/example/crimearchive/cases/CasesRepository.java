@@ -9,8 +9,6 @@ import java.util.Optional;
 @Repository
 public interface CasesRepository extends ListCrudRepository<Cases, Long> {
 
-    List<String> findAllBy(Long accountId);
-
     Optional<Cases> findTopByOrderByCaseNumberDesc();
 
     Optional<Cases> findFirstByCaseNumber(String caseNumber);

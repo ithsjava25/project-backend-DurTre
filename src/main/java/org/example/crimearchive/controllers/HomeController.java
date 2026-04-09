@@ -61,7 +61,7 @@ public class HomeController {
     public String casesPage(@RequestParam Long addAccountId,
                             @RequestParam String case_number){
         caseService.addAccountToCase(addAccountId, case_number);
-        return "cases";
+        return "redirect:/cases";
     }
 
     @PostMapping("/reports/add")
