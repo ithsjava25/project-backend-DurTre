@@ -2,8 +2,9 @@ package org.example.crimearchive.service;
 
 import org.example.crimearchive.DTO.CreateReport;
 import org.example.crimearchive.DTO.ReportResponse;
-import org.example.crimearchive.bevis.Report;
-import org.example.crimearchive.repository.SimpleRepository;
+import org.example.crimearchive.reports.Report;
+import org.example.crimearchive.reports.ReportRepository;
+import org.example.crimearchive.reports.ReportService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,7 +37,7 @@ import static org.mockito.Mockito.*;
 class ReportServiceTest {
 
     @Mock
-    private SimpleRepository simpleRepository;
+    private ReportRepository simpleRepository;
 
     @Mock
     private S3Client s3Client;
@@ -80,7 +81,7 @@ class ReportServiceTest {
                 "file", "evidence.png", "image/png", minimalPng
         );
 
-        reportService.saveReport(request, image);
+        reportService.saveReportWithFile(request, image);
 
         verify(s3Client, times(2)).putObject(any(PutObjectRequest.class), any(RequestBody.class));
         verify(simpleRepository, times(1)).save(any(Report.class));
@@ -93,7 +94,7 @@ class ReportServiceTest {
                 "file", "document.pdf", "application/pdf", "fake-pdf".getBytes()
         );
 
-        reportService.saveReport(request, pdf);
+        reportService.saveReportWithFile(request, pdf);
 
         verify(s3Client, times(2)).putObject(any(PutObjectRequest.class), any(RequestBody.class));
         verify(simpleRepository, times(1)).save(any(Report.class));
@@ -108,7 +109,7 @@ class ReportServiceTest {
                 "fake-word".getBytes()
         );
 
-        reportService.saveReport(request, word);
+        reportService.saveReportWithFile(request, word);
 
         verify(s3Client, times(2)).putObject(any(PutObjectRequest.class), any(RequestBody.class));
         verify(simpleRepository, times(1)).save(any(Report.class));
@@ -119,7 +120,7 @@ class ReportServiceTest {
         CreateReport request = new CreateReport("Johan", "Murder");
         when(simpleRepository.save(any())).thenThrow(new RuntimeException("Database error"));
 
-        assertThrows(IOException.class, () -> reportService.saveReport(request, null));
+        assertThrows(IOException.class, () -> reportService.saveReportWithFile(request, null));
 
         verify(s3Client, atLeastOnce()).deleteObject(any(DeleteObjectRequest.class));
     }

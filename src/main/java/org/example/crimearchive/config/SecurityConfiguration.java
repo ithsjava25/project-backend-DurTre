@@ -4,7 +4,6 @@ import org.example.crimearchive.polis.AccountUserDetailsService;
 import org.example.crimearchive.polis.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -26,7 +25,7 @@ public class SecurityConfiguration {
                     auth.requestMatchers("/favicon.ico").permitAll();
                     auth.requestMatchers("/index").permitAll();
                     auth.requestMatchers("/error").permitAll();
-                    auth.requestMatchers("/cases/add").hasRole("USER");
+                    //auth.requestMatchers("/cases/add").hasRole("USER");
 
                     auth.requestMatchers("/cases").hasRole("ADMIN");
 
@@ -37,7 +36,7 @@ public class SecurityConfiguration {
                     auth.anyRequest().authenticated();
                 })
                 //Bygger inloggingsformuläret automatiskt
-                .oauth2Login(Customizer.withDefaults())
+                //.oauth2Login(Customizer.withDefaults()) lägg till tsm med oauth2 application.properties
                 .formLogin(formLogin -> formLogin.defaultSuccessUrl("/userpage"))
         .build();
     }

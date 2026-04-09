@@ -33,8 +33,7 @@ public class Report {
     public Report() {
     }
 
-    public Report(UUID id, String name, String event, String s3KeyPdf, String s3KeyFile) {
-    public Report(UUID id, String name, String event, Cases caseEntity) {
+    public Report(UUID id, String name, String event, String s3KeyPdf, String s3KeyFile, Cases caseEntity) {
         this.uuid = id;
         this.name = name;
         this.event = event;
@@ -43,8 +42,16 @@ public class Report {
         this.caseEntity = caseEntity;
     }
 
+    public Report(UUID id, String name, String event, String s3Keypdf, String s3KeyFile) {
+        this(id, name, event, s3Keypdf, s3KeyFile, null);
+    }
+
+    public Report(UUID id, String name, String event, Cases caseEntity) {
+        this(id, name, event, null, null, caseEntity);
+    }
+
     public Report(UUID id, String name, String event) {
-        this(id, name, event, null);
+        this(id, name, event, null, null, null);
     }
 
 
